@@ -1,26 +1,42 @@
 # sshkeys-from-yubikey
-A cross-platform tool (Linux &amp; Windows) to extract and display public SSH keys stored on a YubiKey. Useful for quickly retrieving FIDO2 (e.g., sk-ssh-ed25519@openssh.com) or PIV-based keys for use in authorized_keys, CI pipelines, or SSH agents.
+
+Scripts para extraer claves SSH almacenadas en tu YubiKey (FIDO2) en distintos sistemas operativos.
 
 ## Uso rápido
 
-### Linux/macOS (FIDO2)
+### Linux
 
 ```bash
-curl -O https://raw.githubusercontent.com/Ismola/sshkeys-from-yubikey/main/extract_sshkey_fido2.sh && \
-chmod +x extract_sshkey_fido2.sh && \
-./extract_sshkey_fido2.sh
+curl -sL https://raw.githubusercontent.com/Ismola/sshkeys-from-yubikey/main/extract-sshkey-linux.sh | bash
 ```
 
-### Windows (FIDO2)
+### macOS
+
+```bash
+curl -sL https://raw.githubusercontent.com/Ismola/sshkeys-from-yubikey/main/extract-sshkey-macos.sh | bash
+```
+
+### Windows (PowerShell)
+
+Abre PowerShell como administrador y ejecuta:
 
 ```powershell
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Ismola/sshkeys-from-yubikey/main/extract_sshkey_fido2.ps1" -OutFile "extract_sshkey_fido2.ps1"
-# Mueve el archivo a una carpeta local si lo descargaste en una ruta de red
-powershell -ExecutionPolicy Bypass -File .\extract_sshkey_fido2.ps1
+irm https://raw.githubusercontent.com/Ismola/sshkeys-from-yubikey/main/extract-sshkey-windows.ps1 | iex
 ```
 
-> **Nota:** Ejecuta el script desde una carpeta local de Windows, no desde una ruta de red o WSL, para evitar restricciones de PowerShell.
-.\extract_sshkey_fido2.ps1
-```
+## ¿Qué hace el script?
 
-> **Nota:** Ejecuta el script desde una carpeta local de Windows, no desde una ruta de red o WSL, para evitar restricciones de PowerShell.
+- Cambia al directorio `~/.ssh` (o `%USERPROFILE%\.ssh` en Windows).
+- Ejecuta `ssh-keygen -K` para regenerar los archivos de clave pública y privada desde tu YubiKey.
+- Te pedirá el PIN y que toques la YubiKey.
+
+## Requisitos
+
+- OpenSSH 8.3 o superior.
+- YubiKey configurada con clave FIDO2 residente.
+- Tener configurado el PIN en la YubiKey.
+
+## Referencias
+
+- [Documentación oficial de Yubico](https://support.yubico.com/hc/en-us/articles/360016649039-Using-Your-YubiKey-with-SSH)
+- [OpenSSH Manual](https://man.openbsd.org/ssh-keygen)
