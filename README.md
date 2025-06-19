@@ -1,6 +1,12 @@
-# sshkeys-from-yubikey
+# 🔑 sshkeys-from-yubikey
 
 Scripts para extraer claves SSH almacenadas en tu YubiKey (FIDO2) en distintos sistemas operativos.
+
+## 🚀 ¿Qué hace este proyecto?
+
+Permite extraer la clave pública SSH almacenada en una YubiKey, facilitando la integración de hardware seguro en flujos de autenticación SSH. Es útil para desarrolladores y administradores que buscan mejorar la seguridad de acceso a servidores mediante autenticación basada en hardware.
+
+
 
 ## Uso rápido
 
