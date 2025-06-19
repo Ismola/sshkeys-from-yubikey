@@ -27,7 +27,7 @@ if [[ "$RESP" =~ ^([sS][iI]|[sS][íÍ])$ ]]; then
     fi
     rm -rf "$TMPDIR"
 fi
-git sparse-checkout set config
+cd ~
 cp config ~/.ssh/config
 chmod 600 ~/.ssh/config
 cd ~
