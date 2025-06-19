@@ -6,31 +6,31 @@ Write-Host "Claves SSH extraídas desde la YubiKey."
 # Detectar la clave privada recién extraída (la más reciente id_ed25519_sk*)
 $keyFile = Get-ChildItem -Filter "id_ed25519_sk*" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 
-# Crear config temporal para github usando la clave recién extraída
-$configTmp = "$env:USERPROFILE\.ssh\config.tmp"
-@"
-Host github.com
-  HostName github.com
-  User git
-  IdentityFile $env:USERPROFILE\.ssh\$($keyFile.Name)
-  IdentitiesOnly yes
-"@ | Set-Content $configTmp
+# Preguntar si se quiere extraer el config personalizado de ismola
+$resp = Read-Host "¿Quieres extraer el config personalizado de ismola? (Si/No)"
+if ($resp -match '^(si|sí|SI|Si|sI|SÍ)$') {
+    $TmpDir = New-TemporaryFile | % { Remove-Item $_; New-Item -ItemType Directory -Path $_ }
+    $keyPath = Join-Path $env:USERPROFILE ".ssh\$($keyFile.Name)"
+    $env:GIT_SSH_COMMAND = "ssh -i `"$keyPath`""
+    git clone --depth=1 --filter=blob:none "git@github.com:Ismola/personal-ssh-config.git" $TmpDir
 
-# Clonar el repo usando el config temporal y la clave extraída
-$TmpDir = New-TemporaryFile | % { Remove-Item $_; New-Item -ItemType Directory -Path $_ }
-$env:GIT_SSH_COMMAND = "ssh -F $configTmp"
-git clone --depth=1 --filter=blob:none --sparse "git@github.com:Ismola/personal-ssh-config.git" $TmpDir
+    $configPath = Join-Path $TmpDir "config"
+    if (Test-Path $configPath) {
+        Copy-Item $configPath "$env:USERPROFILE\.ssh\config" -Force
+        icacls "$env:USERPROFILE\.ssh\config" /inheritance:r /grant:r "$($env:USERNAME):R"
+        Write-Host "Archivo de configuración SSH descargado y aplicado en .ssh\config"
+    } else {
+        Write-Host "ERROR: No se encontró el archivo 'config' en el repositorio clonado."
+    }
 
-# Comprobar si el clon fue exitoso y si el archivo config existe
-$configPath = Join-Path $TmpDir "config"
-if (Test-Path $configPath) {
-    Copy-Item $configPath "$env:USERPROFILE\.ssh\config" -Force
-    icacls "$env:USERPROFILE\.ssh\config" /inheritance:r /grant:r "$($env:USERNAME):R"
-    Write-Host "Archivo de configuración SSH descargado y aplicado en .ssh\config"
-} else {
-    Write-Host "ERROR: No se encontró el archivo 'config' en el repositorio clonado."
+    Remove-Item $TmpDir -Recurse -Force
+    Remove-Item Env:GIT_SSH_COMMAND
 }
 
+Set-Location $env:USERPROFILE
+Remove-Item $TmpDir -Recurse -Force
+Remove-Item $configTmp
+Remove-Item Env:GIT_SSH_COMMAND
 Set-Location $env:USERPROFILE
 Remove-Item $TmpDir -Recurse -Force
 Remove-Item $configTmp

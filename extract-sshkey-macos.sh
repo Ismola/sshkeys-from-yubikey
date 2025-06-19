@@ -14,19 +14,19 @@ if command -v ssh-add >/dev/null 2>&1; then
     ssh-add "$KEYFILE"
 fi
 
-# Crear config temporal para github usando la clave recién extraída
-cat > ~/.ssh/config.tmp <<EOF
-Host github.com
-  HostName github.com
-  User git
-  IdentityFile ~/.ssh/$KEYFILE
-  IdentitiesOnly yes
-EOF
-
-# Clonar el repo usando el config temporal y la clave extraída
-TMPDIR=$(mktemp -d)
-GIT_SSH_COMMAND="ssh -F ~/.ssh/config.tmp" git clone --depth=1 --filter=blob:none --sparse git@github.com:Ismola/personal-ssh-config.git "$TMPDIR"
-cd "$TMPDIR"
+read -p "¿Quieres extraer el config personalizado de ismola? (Si/No): " RESP
+if [[ "$RESP" =~ ^([sS][iI]|[sS][íÍ])$ ]]; then
+    TMPDIR=$(mktemp -d)
+    GIT_SSH_COMMAND="ssh -i ~/.ssh/$KEYFILE" git clone --depth=1 --filter=blob:none git@github.com:Ismola/personal-ssh-config.git "$TMPDIR"
+    if [ -f "$TMPDIR/config" ]; then
+        cp "$TMPDIR/config" ~/.ssh/config
+        chmod 600 ~/.ssh/config
+        echo "Archivo de configuración SSH descargado y aplicado en ~/.ssh/config"
+    else
+        echo "ERROR: No se encontró el archivo 'config' en el repositorio clonado."
+    fi
+    rm -rf "$TMPDIR"
+fi
 git sparse-checkout set config
 cp config ~/.ssh/config
 chmod 600 ~/.ssh/config
