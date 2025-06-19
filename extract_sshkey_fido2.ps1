@@ -3,6 +3,6 @@
 # Requiere: OpenSSH >= 8.2p1
 
 # Generar nueva clave SSH FIDO2 (requiere tocar la YubiKey)
-ssh-keygen.exe -t ed25519-sk -f yubikey-fido2-sshkey -N ""
+ssh-keygen.exe -t ed25519-sk -f yubikey-fido2-sshkey -N ''
 
 Write-Output "Clave pública SSH extraída en yubikey-fido2-sshkey.pub"
