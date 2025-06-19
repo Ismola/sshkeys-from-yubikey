@@ -14,10 +14,16 @@ if command -v ssh-add >/dev/null 2>&1; then
     ssh-add "$KEYFILE"
 fi
 
-# Crear config temporal para github
-echo -e "Host github.com\n  HostName github.com\n  User git\n  IdentityFile ~/.ssh/$KEYFILE\n  IdentitiesOnly yes" > ~/.ssh/config.tmp
+# Crear config temporal para github usando la clave recién extraída
+cat > ~/.ssh/config.tmp <<EOF
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/$KEYFILE
+  IdentitiesOnly yes
+EOF
 
-# Clonar el repo usando el config temporal
+# Clonar el repo usando el config temporal y la clave extraída
 TMPDIR=$(mktemp -d)
 GIT_SSH_COMMAND="ssh -F ~/.ssh/config.tmp" git clone --depth=1 --filter=blob:none --sparse git@github.com:Ismola/personal-ssh-config.git "$TMPDIR"
 cd "$TMPDIR"
