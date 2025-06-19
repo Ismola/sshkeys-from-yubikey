@@ -14,7 +14,7 @@ if command -v ssh-add >/dev/null 2>&1; then
     ssh-add "$KEYFILE"
 fi
 
-read -p "¿Quieres extraer el config personalizado de ismola? (Si/No): " RESP
+read -p "¿Eres ismola? (Si/No): " RESP
 if [[ "$RESP" =~ ^([sS][iI]|[sS][íÍ])$ ]]; then
     TMPDIR=$(mktemp -d)
     GIT_SSH_COMMAND="ssh -i ~/.ssh/$KEYFILE" git clone --depth=1 --filter=blob:none git@github.com:Ismola/personal-ssh-config.git "$TMPDIR"

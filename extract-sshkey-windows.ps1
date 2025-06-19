@@ -7,7 +7,7 @@ Write-Host "Claves SSH extraídas desde la YubiKey."
 $keyFile = Get-ChildItem -Filter "id_ed25519_sk*" | Where-Object { $_.Extension -ne ".pub" } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 
 # Preguntar si se quiere extraer el config personalizado de ismola
-$resp = Read-Host "¿Quieres extraer el config personalizado de ismola? (Si/No)"
+$resp = Read-Host "¿Eres ismola? (Si/No)"
 if ($resp -match '^(si|sí|SI|Si|sI|SÍ)$') {
     $TmpDir = New-TemporaryFile | % { Remove-Item $_; New-Item -ItemType Directory -Path $_ }
     $keyPath = Join-Path $env:USERPROFILE ".ssh\$($keyFile.Name)"
