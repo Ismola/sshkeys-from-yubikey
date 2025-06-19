@@ -29,10 +29,10 @@ if ($resp -match '^(si|sí|SI|Si|sI|SÍ)$') {
 }
 
 Set-Location $env:USERPROFILE
+
 if ($TmpDir -and (Test-Path $TmpDir)) { Remove-Item $TmpDir -Recurse -Force }
 if ($configTmp -and (Test-Path $configTmp)) { Remove-Item $configTmp }
-if (Test-Path Env:\GIT_SSH_COMMAND) { Remove-Item Env:GIT_SSH_COMMAND }
-Set-Location $env:USERPROFILE
+if (Test-Path Env:\GIT_SSH_COMMAND) { Remove-Item Env:\GIT_SSH_COMMAND }
 Remove-Item $TmpDir -Recurse -Force
 Remove-Item $configTmp
 Remove-Item Env:GIT_SSH_COMMAND
