@@ -24,11 +24,17 @@ if ($resp -match '^(si|sí|SI|Si|sI|SÍ)$') {
     if (Test-Path $configPath) {
         $destConfig = "$env:USERPROFILE\.ssh\config"
         if (Test-Path $destConfig) {
-            Remove-Item $destConfig -Force
+            # Remover permisos heredados y otorgar control total antes de eliminar
+            icacls $destConfig /inheritance:r /grant:r "$($env:USERNAME):F" | Out-Null
+            Remove-Item $destConfig -Force -ErrorAction SilentlyContinue
         }
-        Copy-Item $configPath $destConfig
-        icacls $destConfig /inheritance:r /grant:r "$($env:USERNAME):R"
-        Write-Host "Archivo de configuración SSH descargado y aplicado en .ssh\config"
+        Copy-Item $configPath $destConfig -Force -ErrorAction SilentlyContinue
+        if (Test-Path $destConfig) {
+            icacls $destConfig /inheritance:r /grant:r "$($env:USERNAME):R"
+            Write-Host "Archivo de configuración SSH descargado y aplicado en .ssh\config"
+        } else {
+            Write-Host "ERROR: No se pudo copiar el archivo 'config'."
+        }
     } else {
         Write-Host "ERROR: No se encontró el archivo 'config' en el repositorio clonado."
     }
