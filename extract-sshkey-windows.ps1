@@ -24,16 +24,25 @@ if ($resp -match '^(si|sí|SI|Si|sI|SÍ)$') {
     if (Test-Path $configPath) {
         $destConfig = "$env:USERPROFILE\.ssh\config"
         if (Test-Path $destConfig) {
-            # Remover permisos heredados y otorgar control total antes de eliminar
-            icacls $destConfig /inheritance:r /grant:r "$($env:USERNAME):F" | Out-Null
+            # Remover atributo de solo lectura si existe
+            $file = Get-Item $destConfig -ErrorAction SilentlyContinue
+            if ($file) {
+                $file.Attributes = $file.Attributes -band -bnot [System.IO.FileAttributes]::ReadOnly
+            }
+            # Intentar eliminar el archivo
             Remove-Item $destConfig -Force -ErrorAction SilentlyContinue
         }
         Copy-Item $configPath $destConfig -Force -ErrorAction SilentlyContinue
         if (Test-Path $destConfig) {
-            icacls $destConfig /inheritance:r /grant:r "$($env:USERNAME):R"
+            # Establecer permisos de lectura
+            try {
+                icacls $destConfig /inheritance:r /grant:r "$($env:USERNAME):R" 2>$null | Out-Null
+            } catch {
+                # Si icacls falla, continuar de todas formas
+            }
             Write-Host "Archivo de configuración SSH descargado y aplicado en .ssh\config"
         } else {
-            Write-Host "ERROR: No se pudo copiar el archivo 'config'."
+            Write-Host "ERROR: No se pudo copiar el archivo 'config'. Ejecuta PowerShell como Administrador e intenta nuevamente."
         }
     } else {
         Write-Host "ERROR: No se encontró el archivo 'config' en el repositorio clonado."
