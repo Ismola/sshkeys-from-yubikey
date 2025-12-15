@@ -1,4 +1,12 @@
-Set-Location $env:USERPROFILE\.ssh
+$sshDir = "$env:USERPROFILE\.ssh"
+
+# Crear la carpeta .ssh si no existe
+if (-not (Test-Path $sshDir)) {
+    New-Item -ItemType Directory -Path $sshDir -Force | Out-Null
+    Write-Host "Carpeta .ssh creada en: $sshDir"
+}
+
+Set-Location $sshDir
 Write-Host "Inserta tu YubiKey y toca el dispositivo cuando se te pida."
 ssh-keygen -K
 Write-Host "Claves SSH extraídas desde la YubiKey."
