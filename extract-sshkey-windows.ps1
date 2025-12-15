@@ -6,6 +6,11 @@ Write-Host "Claves SSH extraídas desde la YubiKey."
 # Detectar la clave privada recién extraída (la más reciente id_ed25519_sk*, excluyendo .pub)
 $keyFile = Get-ChildItem -Filter "id_ed25519_sk*" | Where-Object { $_.Extension -ne ".pub" } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 
+if (-not $keyFile) {
+    Write-Host "ERROR: No se encontró ninguna clave SSH generada."
+    exit 1
+}
+
 # Preguntar si se quiere extraer el config personalizado de ismola
 $resp = Read-Host "¿Eres ismola? (Si/No)"
 if ($resp -match '^(si|sí|SI|Si|sI|SÍ)$') {
