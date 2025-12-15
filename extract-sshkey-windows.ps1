@@ -17,8 +17,12 @@ if ($resp -match '^(si|sí|SI|Si|sI|SÍ)$') {
 
     $configPath = Join-Path $TmpDir "config"
     if (Test-Path $configPath) {
-        Copy-Item $configPath "$env:USERPROFILE\.ssh\config" -Force
-        icacls "$env:USERPROFILE\.ssh\config" /inheritance:r /grant:r "$($env:USERNAME):R"
+        $destConfig = "$env:USERPROFILE\.ssh\config"
+        if (Test-Path $destConfig) {
+            Remove-Item $destConfig -Force
+        }
+        Copy-Item $configPath $destConfig
+        icacls $destConfig /inheritance:r /grant:r "$($env:USERNAME):R"
         Write-Host "Archivo de configuración SSH descargado y aplicado en .ssh\config"
     } else {
         Write-Host "ERROR: No se encontró el archivo 'config' en el repositorio clonado."
@@ -31,8 +35,4 @@ if ($resp -match '^(si|sí|SI|Si|sI|SÍ)$') {
 Set-Location $env:USERPROFILE
 
 if ($TmpDir -and (Test-Path $TmpDir)) { Remove-Item $TmpDir -Recurse -Force }
-if ($configTmp -and (Test-Path $configTmp)) { Remove-Item $configTmp }
 if (Test-Path Env:\GIT_SSH_COMMAND) { Remove-Item Env:\GIT_SSH_COMMAND }
-Remove-Item $TmpDir -Recurse -Force
-Remove-Item $configTmp
-Remove-Item Env:GIT_SSH_COMMAND
