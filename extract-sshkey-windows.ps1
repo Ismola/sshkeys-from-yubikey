@@ -29,8 +29,9 @@ if ($resp -match '^(si|sí|SI|Si|sI|SÍ)$') {
     git clone "git@github.com:Ismola/personal-ssh-config.git" $TmpDir
 
     $configPath = Join-Path $TmpDir "config"
+    $destConfig = "$env:USERPROFILE\.ssh\config"
+    
     if (Test-Path $configPath) {
-        $destConfig = "$env:USERPROFILE\.ssh\config"
         if (Test-Path $destConfig) {
             # Remover atributo de solo lectura si existe
             $file = Get-Item $destConfig -ErrorAction SilentlyContinue
@@ -50,10 +51,25 @@ if ($resp -match '^(si|sí|SI|Si|sI|SÍ)$') {
             }
             Write-Host "Archivo de configuración SSH descargado y aplicado en .ssh\config"
         } else {
-            Write-Host "ERROR: No se pudo copiar el archivo 'config'. Ejecuta PowerShell como Administrador e intenta nuevamente."
+            Write-Host "ADVERTENCIA: No se pudo copiar el archivo 'config'."
         }
     } else {
-        Write-Host "ERROR: No se encontró el archivo 'config' en el repositorio clonado."
+        # Si no existe config en el repositorio clonado, crear uno vacío
+        Write-Host "ADVERTENCIA: No se encontró el archivo 'config' en el repositorio clonado. Creando archivo vacío."
+        if (Test-Path $destConfig) {
+            $file = Get-Item $destConfig -ErrorAction SilentlyContinue
+            if ($file) {
+                $file.Attributes = $file.Attributes -band -bnot [System.IO.FileAttributes]::ReadOnly
+            }
+            Remove-Item $destConfig -Force -ErrorAction SilentlyContinue
+        }
+        New-Item -ItemType File -Path $destConfig -Force | Out-Null
+        try {
+            icacls $destConfig /inheritance:r /grant:r "$($env:USERNAME):R" 2>$null | Out-Null
+        } catch {
+            # Si icacls falla, continuar de todas formas
+        }
+        Write-Host "Archivo SSH config creado en: $destConfig"
     }
 
     if (Test-Path $TmpDir) { Remove-Item $TmpDir -Recurse -Force }
